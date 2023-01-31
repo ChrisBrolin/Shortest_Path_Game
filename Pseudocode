@@ -1,0 +1,78 @@
+PROCEDURE generate_dots(num_dots)
+    dots = []
+    FOR i = 1 TO num_dots
+        x = random number between 20 and width-20
+        y = random number between 20 and height-20
+        dot = CREATE dot(x, y)
+        dots.append(dot)
+    start_dot = dots[0]
+    current_dot = start_dot
+END PROCEDURE
+
+PROCEDURE calculate_route_distance()
+    route_distance = 0
+    FOR i = 0 TO LENGTH(lines)-1
+        line1 = lines[i]
+        line2 = lines[i+1]
+        distance = sqrt((line2[0] - line1[0])^2 + (line2[1] - line1[1])^2)
+        route_distance = route_distance + distance
+END PROCEDURE
+
+PROCEDURE nearest_neighbor()
+    optimal_route = []
+    unvisited_dots = copy(dots)
+    current_dot = start_dot
+    optimal_route.append(current_dot)
+    unvisited_dots.remove(current_dot)
+    WHILE unvisited_dots is not empty
+        closest_dot = None
+        closest_distance = None
+        FOR dot in unvisited_dots
+            distance = sqrt((dot.x - current_dot.x)^2 + (dot.y - current_dot.y)^2)
+            IF closest_distance is None or distance < closest_distance
+                closest_distance = distance
+                closest_dot = dot
+        optimal_route.append(closest_dot)
+        unvisited_dots.remove(closest_dot)
+        current_dot = closest_dot
+    optimal_route = optimal_route
+END PROCEDURE
+
+PROCEDURE calculate_optimal_distance()
+    optimal_distance = 0
+    FOR i = 0 TO LENGTH(optimal_route)-1
+        IF i+1 < LENGTH(optimal_route)
+            dot1 = optimal_route[i]
+            dot2 = optimal_route[i + 1]
+            distance = sqrt((dot2.x - dot1.x)^2 + (dot2.y - dot1.y)^2)
+            optimal_distance = optimal_distance + distance
+    optimal_distance = optimal_distance + sqrt((start_dot.x - optimal_route[LENGTH(optimal_route) - 1].x)^2 + (start_dot.y - optimal_route[LENGTH(optimal_route) - 1].y)^2)
+END PROCEDURE
+
+PROCEDURE animate_optimal_route()
+    FOR i = 1 TO LENGTH(optimal_route)
+        dot1 = optimal_route[i - 1]
+        dot2 = optimal_route[i]
+        DRAW line from dot1 to dot2 in BLUE color on screen
+    DISPLAY route_distance and optimal_distance on screen
+END PROCEDURE
+
+PROCEDURE run_game()
+    WHILE not done
+        FOR event in pygame events
+            IF event is QUIT
+                done = True
+            IF event is MOUSEBUTTONDOWN
+                add line from current_dot to dot nearest to current mouse position
+                current_dot = dot nearest to current mouse position
+                calculate_route_distance()
+        CLEAR screen
+        FOR dot in dots
+            dot.draw(screen)
+        FOR line in lines
+            DRAW line on screen
+        animate_optimal_route()
+        UPDATE display
+        DELAY framerate
+END PROCEDURE
+
